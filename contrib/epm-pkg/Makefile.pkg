@@ -1,10 +1,61 @@
+# -*- mode: makefile; -*-
+
 # contrib/epm-pkg/Makefile
 # Build packages with epm program.
 # All the config files are in: contrib/epm-pkg/
 
 # To use always reference the contrib/epm-pkg/Makefile
-# make -f contrib/epm-pkg/Makefile TARGET
+# make -f contrib/epm-pkg/Makefile.pkg TARGET
 
-# make config
-# make build - build the pseudo root dist/
-# make package - create the package. Put it in pkg/
+# --------------------
+# Macros
+SHELL=/bin/bash
+
+# --------------------
+# Targets
+help : check-top
+	@echo -e "\nalias pkg='make -f contrib/epm-pkg/Makefile.pkg'"
+	@echo -e "\nInitialize"
+	@echo -e '\tpkg config\n'
+	@echo -e "Build the pseudo root dist/"
+	@echo -e "\tpkg build\n"
+	@echo -e "Create the package. Put it in pkg/"
+	@echo -e "\tpkg package"
+
+clean :
+	find . -type f -name '*~' -exec rm {} \;
+
+dist-clean :  check-top clean
+	rm -rf dist pkg
+
+config : check-top
+	./autogen.sh
+	./configure --prefix=$$PWD/dist/usr/local
+
+build : check-config
+	make
+	make install
+	make html
+	-mkdir -p dist/usr/local/share/rsnapshot
+	cp -r docs/* dist/usr/local/share/rsnapshot
+	cp COPYING dist/usr/local/share/rsnapshot
+	mv rsnapshot.html dist/usr/local/share/rsnapshot
+	grep PRETTY_NAME /etc/lsb-release >dist/usr/local/share/rsnapshot/build-os
+	uname -a >>dist/usr/local/share/rsnapshot/build-os
+
+package : build
+
+# --------------------
+# Subtargets
+
+check-top :
+	@if [[ ! -d contrib ]]; then \
+		echo "You are not in the top dir."; \
+		exit 1;  \
+	fi
+
+check-config : check-top
+	@if [[ ! -f configure ]]; then \
+		echo "config target was not run"; \
+		exit 1;  \
+	fi
