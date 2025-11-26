@@ -45,6 +45,11 @@ build : check-config
 
 package : build
 
+save :
+	git pull origin develop
+	git commit -am Updated
+	git push origin develop
+
 # --------------------
 # Subtargets
 
