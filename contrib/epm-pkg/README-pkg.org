@@ -1,0 +1,13 @@
+* Build rsnapshot packages with EPM
+** Dependencies
+
++ epm
+  + Release: https://moria.whyayh.com/rel/released/software/ThirdParty/epm/
+  + Forked Source: https://github.com/TurtleEngr/epm-deb-pkg
+  + Source: https://github.com/jimjag/epm
+  + Provides: epm, epminstall, mkepmlist
+
++ epm-helper
+  + Release: https://moria.whyayh.com/rel/released/software/ThirdParty/epm/
+  + Source: https://github.com/TurtleEngr/epm-helper
+  + Provides: mkver.pl, patch-epm-list

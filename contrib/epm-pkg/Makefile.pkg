@@ -7,12 +7,17 @@
 # To use always reference the contrib/epm-pkg/Makefile
 # make -f contrib/epm-pkg/Makefile.pkg TARGET
 
+
 # --------------------
 # Macros
 SHELL=/bin/bash
+mRsyncOpt = -azP
+
+include ver.mak
 
 # --------------------
-# Targets
+# Manual Targets
+
 help : check-top
 	@echo -e "\nalias pkg='make -f contrib/epm-pkg/Makefile.pkg'"
 	@echo -e "\nInitialize"
@@ -28,11 +33,11 @@ clean :
 dist-clean :  check-top clean
 	rm -rf dist pkg
 
-config : check-top
+config configure : check-top check-deps ver.mak
 	./autogen.sh
 	./configure --prefix=$$PWD/dist/usr/local
 
-build : check-config
+build : check-top configure dist ver.env
 	make
 	make install
 	make html
@@ -43,7 +48,9 @@ build : check-config
 	grep PRETTY_NAME /etc/lsb-release >dist/usr/local/share/rsnapshot/build-os
 	uname -a >>dist/usr/local/share/rsnapshot/build-os
 
-package : build
+package : build pkg ver.epm
+
+release : save ver.env
 
 save :
 	git pull origin develop
@@ -51,7 +58,7 @@ save :
 	git push origin develop
 
 # --------------------
-# Subtargets
+# Rules
 
 check-top :
 	@if [[ ! -d contrib ]]; then \
@@ -59,8 +66,17 @@ check-top :
 		exit 1;  \
 	fi
 
-check-config : check-top
-	@if [[ ! -f configure ]]; then \
-		echo "config target was not run"; \
-		exit 1;  \
-	fi
+check-deps :
+	command -v epm
+	command -v epm-patch
+	command -v git
+	command -v mkepmlist
+	command -v mkver.pl
+	command -v perl
+	command -v rsync
+
+dist pkg :
+	mkdir $@
+
+ver.mak ver.env ver.epm : ver.sh
+	export RELEASE=1; mkver.pl -e 'mak env epm'
