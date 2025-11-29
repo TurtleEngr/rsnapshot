@@ -1,10 +1,9 @@
 # -*- mode: makefile; -*-
-
-# contrib/epm-pkg/Makefile
+# contrib/epm-pkg/Makefile.pkg
 # Build packages with epm program.
 # All the config files are in: contrib/epm-pkg/
 
-# To use always reference the contrib/epm-pkg/Makefile
+# To use always reference the contrib/epm-pkg/Makefile.pkg. See alias.
 # make -f contrib/epm-pkg/Makefile.pkg TARGET
 
 
@@ -101,4 +100,4 @@ dist pkg :
 
 $(mPkg)/ver.mak $(mPkg)/ver.env $(mPkg)/ver.epm : $(mPkg)/ver.sh
 	export RELEASE=1; mkver.pl -e 'mak env epm' -d $?
-	mv $@ $(mPkg)
+	mv ver.mak ver.env ver.epm $(mPkg)
