@@ -73,8 +73,8 @@ release : save ver.env
 # 7
 save :
 	git pull origin develop
-	git commit -am Updated
-	git push origin develop
+	-git commit -am Updated
+	-git push origin develop
 	@echo -e '\nIf done type "make dist-clean"'
 
 # 8
