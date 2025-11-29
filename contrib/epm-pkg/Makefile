@@ -70,7 +70,8 @@ release : save ver.env
 	+. ./ver.env; echo rsync -P ../../pkg/* $$ProdRelServer:$$ProdRelDir/$$ProdOS
 	. ./ver.env; rsync -P ../../pkg/* $$ProdRelServer:$$ProdRelDir/$$ProdOS
 
-# 7 save :
+# 7
+save :
 	git pull origin develop
 	git commit -am Updated
 	git push origin develop
