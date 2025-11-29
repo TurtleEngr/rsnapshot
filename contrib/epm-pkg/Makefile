@@ -11,18 +11,16 @@
 # Macros
 SHELL=/bin/bash
 mRsyncOpt=-azP
-mPkg=contrib/epm-pkg
 mPrefix=dist/usr/local
 mShare=$(mPrefix)/share/doc/rsnapshot
 
-include $(mPkg)/ver.mak
+include ver.mak
 
 # --------------------
 # Manual Targets
 
 # 1
-help : check-top check-deps
-	@echo -e "\nalias pkg='make -f contrib/epm-pkg/Makefile.pkg'"
+help :
 	@echo -e "\nInitialize"
 	@echo -e '\tpkg config\n'
 	@echo -e "Build the pseudo root dist/"
@@ -31,42 +29,58 @@ help : check-top check-deps
 	@echo -e "\tpkg package"
 
 # 2
-config : check-top check-deps configure $(mPkg)/ver.mak
+config : check-deps ../../configure ver.mak
+	@echo -e '\nNow type "make build"'
 
 # 3
-build : check-top configure dist $(mPkg)/ver.env
-	make
-	make install
-	make html
-	-mkdir -p $(mShare)
-	cp -r docs/* $(mShare)
-	cp COPYING $(mShare)/LICENSE
-	cp README.md $(mShare)
-	cp rsnapshot.html $(mShare)
-	grep PRETTY_NAME /etc/lsb-release >$(mShare)/build-os
-	uname -a >>$(mShare)/build-os
-	mkepmlist -u root -g root --prefix / dist | patch-epm-list -f ./$(mPkg)/epm.patch >$(mPkg)/epm.list
+build ../../dist/usr/local/bin/rsnapshot : ../../configure ../../dist ver.env
+	-rm -rf ../../dist/*
+	cd ../..; make
+	cd ../..; make install
+	cd ../..; make html
+	-cd ../..; mkdir -p $(mShare)
+	cd ../..; cp -r docs/* $(mShare)
+	cd ../..; cp COPYING $(mShare)/LICENSE
+	cd ../..; cp README.md $(mShare)
+	cd ../..; cp rsnapshot.html $(mShare)
+	grep PRETTY_NAME /etc/lsb-release >../../$(mShare)/build-os
+	uname -a >>../../$(mShare)/build-os
+	find ../../dist -type d -exec chmod a+rx {} \;
+	find ../../dist -type f -exec chmod a+r {} \;
+	cd ../..; mkepmlist -u root -g root --prefix / dist | patch-epm-list -f ./contrib/epm-pkg/epm.patch >contrib/epm-pkg/epm.list
+	@echo -e '\nNow type "make test"'
 
 # 4
 test :
-	make test
+	cd ../..; make test
+	@echo -e '\nIf OK type "make package"'
 
 # 5
-package : build pkg $(mPkg)/ver.epm
+package : ../../dist/usr/local/bin/rsnapshot ../../pkg ver.epm
+	if [ "$$(whoami)" != 'root' ]; then exit 1; fi
+	-rm -f ../../pkg/*
+	cd ../..; epm -v -f native --output-dir pkg rsnapshot contrib/epm-pkg/ver.epm
+	chown -R $$SUDO_USER:$$SUDO_USER ../../*
+	@echo -e '\nIf OK type "make release"'
 
 # 6
-release : save $(mPkg)/ver.env
+release : save ver.env
+	+. ./ver.env; echo ssh $$ProdRelServer mkdir -p $$ProdRelDir/$$ProdOS
+	. ./ver.env; ssh $$ProdRelServer mkdir -p $$ProdRelDir/$$ProdOS
+	+. ./ver.env; echo rsync -P ../../pkg/* $$ProdRelServer:$$ProdRelDir/$$ProdOS
+	. ./ver.env; rsync -P ../../pkg/* $$ProdRelServer:$$ProdRelDir/$$ProdOS
 
 # 7 save :
 	git pull origin develop
 	git commit -am Updated
 	git push origin develop
+	@echo -e '\nIf done type "make dist-clean"'
 
 # 8
-dist-clean : check-top clean
-	-make clean
-	-rm -rf dist pkg configure $(mPkg)/epm.list \
-		$(mPkg)/ver.mak $(mPkg)/ver.env $(mPkg)/ver.epm
+dist-clean : clean
+	-cd ../..; make clean
+	-cd ../..; rm -rf dist pkg configure rsnapshot.html
+	-rm  epm.list ver.mak ver.env ver.epm
 
 clean :
 	-find . -type f -name '*~' -exec rm {} \;
@@ -74,30 +88,24 @@ clean :
 # --------------------
 # Rules
 
-check-top :
-	@if [[ ! -d contrib ]]; then \
-		echo "You are not in the top dir."; \
-		exit 1;  \
-	fi
-
 check-deps :
-	command -v aclocal
-	command -v autoreconf
-	command -v epm
-	command -v git
-	command -v mkepmlist
-	command -v mkver.pl
-	command -v patch-epm-list
-	command -v perl
-	command -v rsync
+	command -v aclocal >/dev/null
+	command -v autoreconf >/dev/null
+	command -v epm >/dev/null
+	command -v git >/dev/null
+	command -v git >/dev/null
+	command -v mkepmlist >/dev/null
+	command -v mkver.pl >/dev/null
+	command -v patch-epm-list >/dev/null
+	command -v perl >/dev/null
+	command -v rsync >/dev/null
 
-configure : autogen.sh
-	./autogen.sh
-	./configure --prefix=$$PWD/$(mPrefix)
+../../configure : ../../autogen.sh
+	cd ../..; ./autogen.sh
+	cd ../..; ./configure --prefix=$$PWD/$(mPrefix)
 
-dist pkg :
-	mkdir $@
+../../dist ../../pkg :
+	-mkdir $@
 
-$(mPkg)/ver.mak $(mPkg)/ver.env $(mPkg)/ver.epm : $(mPkg)/ver.sh
+ver.mak ver.env ver.epm : ver.sh
 	export RELEASE=1; mkver.pl -e 'mak env epm' -d $?
-	mv ver.mak ver.env ver.epm $(mPkg)
