@@ -55,7 +55,7 @@ build ../../dist/usr/local/bin/rsnapshot : ../../configure ../../dist ver.env
 # 4
 test :
 	cd ../..; make test
-	@echo -e '\nIf OK type "make package"'
+	@echo -e '\nIf OK type "sudo make package"'
 
 # 5
 package : ../../dist/usr/local/bin/rsnapshot ../../pkg ver.epm
