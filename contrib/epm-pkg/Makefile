@@ -30,10 +30,12 @@ help :
 
 # 2
 config : check-deps ../../configure ver.mak
+	if [ "$$(whoami)" != 'root' ]; then exit 1; fi
 	@echo -e '\nNow type "make build"'
 
 # 3
 build ../../dist/usr/local/bin/rsnapshot : ../../configure ../../dist ver.env
+	if [ "$$(whoami)" = 'root' ]; then exit 1; fi
 	-rm -rf ../../dist/*
 	cd ../..; make
 	cd ../..; make install
@@ -66,6 +68,7 @@ package : ../../dist/usr/local/bin/rsnapshot ../../pkg ver.epm
 
 # 6
 release : save ver.env
+	if [ "$$(whoami)" != 'root' ]; then exit 1; fi
 	+. ./ver.env; echo ssh $$ProdRelServer mkdir -p $$ProdRelDir/$$ProdOS
 	. ./ver.env; ssh $$ProdRelServer mkdir -p $$ProdRelDir/$$ProdOS
 	+. ./ver.env; echo rsync -P ../../pkg/* $$ProdRelServer:$$ProdRelDir/$$ProdOS
@@ -73,6 +76,7 @@ release : save ver.env
 
 # 7
 save :
+	if [ "$$(whoami)" != 'root' ]; then exit 1; fi
 	git pull origin develop
 	-git commit -am Updated
 	-git push origin develop
