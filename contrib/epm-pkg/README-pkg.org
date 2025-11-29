@@ -33,7 +33,7 @@
 
 ** Files in contrib/epm-pkg/
 + README-pkg.org - this file
-+ Makefile.pkg
++ Makefile - targets for building packages
 + epm.patch* - remove dirs that do not belong to the package
 + mx.require - list required packages for the mx distribution
 + ver.sh* - define the package's meta-data.

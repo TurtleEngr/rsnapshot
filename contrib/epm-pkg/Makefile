@@ -59,7 +59,8 @@ test :
 package : ../../dist/usr/local/bin/rsnapshot ../../pkg ver.epm
 	if [ "$$(whoami)" != 'root' ]; then exit 1; fi
 	-rm -f ../../pkg/*
-	cd ../..; epm -v -f native --output-dir pkg rsnapshot contrib/epm-pkg/ver.epm
+	cd ../..; epm -v -f native --output-dir pkg $(ProdName) contrib/epm-pkg/ver.epm
+	cd ../..; epm -v -f portable --output-dir pkg -m $(ProdOSDist)-$(ProdArch) $(ProdName) contrib/epm-pkg/ver.epm
 	chown -R $$SUDO_USER:$$SUDO_USER ../../*
 	@echo -e '\nIf OK type "make release"'
 
