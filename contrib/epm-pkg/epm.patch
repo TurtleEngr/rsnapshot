@@ -1,11 +1,8 @@
 $pDel{"/usr"} = 1;
-$pDel{"/usr/share"} = 1;
-$pDel{"/usr/share/man"} = 1;
-$pDel{"/usr/share/man/man1"} = 1;
-$pDel{"/usr/share/doc"} = 1;
-$pDel{"/usr/lib"} = 1;
-$pDel{"/usr/lib/git-core"} = 1;
-
-$pConf{"/usr/share/doc/git-proj/config/gitconfig"} = 1;
-$pConf{"/usr/share/doc/git-proj/config/gitignore"} = 1;
-$pConf{"/usr/share/doc/git-proj/hooks/pre-commit"} = 1;
+$pDel{"/usr/local"} = 1;
+$pDel{"/usr/local/bin"} = 1;
+$pDel{"/usr/local/etc"} = 1;
+$pDel{"/usr/local/share"} = 1;
+$pDel{"/usr/local/share/doc"} = 1;
+$pDel{"/usr/local/share/man"} = 1;
+$pDel{"/usr/local/share/man/man1"} = 1;

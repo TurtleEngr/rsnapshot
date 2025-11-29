@@ -11,14 +11,18 @@
 # --------------------
 # Macros
 SHELL=/bin/bash
-mRsyncOpt = -azP
+mRsyncOpt=-azP
+mPkg=contrib/epm-pkg
+mPrefix=dist/usr/local
+mShare=$(mPrefix)/share/doc/rsnapshot
 
-include ver.mak
+include $(mPkg)/ver.mak
 
 # --------------------
 # Manual Targets
 
-help : check-top
+# 1
+help : check-top check-deps
 	@echo -e "\nalias pkg='make -f contrib/epm-pkg/Makefile.pkg'"
 	@echo -e "\nInitialize"
 	@echo -e '\tpkg config\n'
@@ -27,37 +31,46 @@ help : check-top
 	@echo -e "Create the package. Put it in pkg/"
 	@echo -e "\tpkg package"
 
-clean :
-	find . -type f -name '*~' -exec rm {} \;
+# 2
+config : check-top check-deps configure $(mPkg)/ver.mak
 
-dist-clean :  check-top clean
-	rm -rf dist pkg
-
-config configure : check-top check-deps ver.mak
-	./autogen.sh
-	./configure --prefix=$$PWD/dist/usr/local
-
-build : check-top configure dist ver.env
+# 3
+build : check-top configure dist $(mPkg)/ver.env
 	make
 	make install
 	make html
-	-mkdir -p dist/usr/local/share/doc/rsnapshot
-	cp -r docs/* dist/usr/local/share/doc/rsnapshot
-	cp COPYING dist/usr/local/share/doc/rsnapshot
-	cp LICENSE dist/usr/local/share/doc/rsnapshot
-	cp README.md dist/usr/local/share/doc/rsnapshot
-	cp rsnapshot.html dist/usr/local/share/doc/rsnapshot
-	grep PRETTY_NAME /etc/lsb-release >dist/usr/local/share/rsnapshot/build-os
-	uname -a >>dist/usr/local/share/rsnapshot/build-os
+	-mkdir -p $(mShare)
+	cp -r docs/* $(mShare)
+	cp COPYING $(mShare)/LICENSE
+	cp README.md $(mShare)
+	cp rsnapshot.html $(mShare)
+	grep PRETTY_NAME /etc/lsb-release >$(mShare)/build-os
+	uname -a >>$(mShare)/build-os
+	mkepmlist -u root -g root --prefix / dist | patch-epm-list -f ./$(mPkg)/epm.patch >$(mPkg)/epm.list
 
-package : build pkg ver.epm
+# 4
+test :
+	make test
 
-release : save ver.env
+# 5
+package : build pkg $(mPkg)/ver.epm
 
-save :
+# 6
+release : save $(mPkg)/ver.env
+
+# 7 save :
 	git pull origin develop
 	git commit -am Updated
 	git push origin develop
+
+# 8
+dist-clean : check-top clean
+	-make clean
+	-rm -rf dist pkg configure $(mPkg)/epm.list \
+		$(mPkg)/ver.mak $(mPkg)/ver.env $(mPkg)/ver.epm
+
+clean :
+	-find . -type f -name '*~' -exec rm {} \;
 
 # --------------------
 # Rules
@@ -69,16 +82,23 @@ check-top :
 	fi
 
 check-deps :
+	command -v aclocal
+	command -v autoreconf
 	command -v epm
-	command -v epm-patch
 	command -v git
 	command -v mkepmlist
 	command -v mkver.pl
+	command -v patch-epm-list
 	command -v perl
 	command -v rsync
+
+configure : autogen.sh
+	./autogen.sh
+	./configure --prefix=$$PWD/$(mPrefix)
 
 dist pkg :
 	mkdir $@
 
-ver.mak ver.env ver.epm : ver.sh
-	export RELEASE=1; mkver.pl -e 'mak env epm'
+$(mPkg)/ver.mak $(mPkg)/ver.env $(mPkg)/ver.epm : $(mPkg)/ver.sh
+	export RELEASE=1; mkver.pl -e 'mak env epm' -d $?
+	mv $@ $(mPkg)

@@ -1,13 +1,51 @@
 * Build rsnapshot packages with EPM
-** Dependencies
+** Setup
++ Install the dependencies.
++ Modify ver.sh as needed.
++ Define pkg alias to make building easier
+  + alias pkg='make -f contrib/epm-pkg/Makefile.pkg'
+** Package Steps
++ pkg config
+  + Generate configure script and run it.
++ pkg build
+  + Build the files and install them in dist/usr/local
+  + Manually check epm.list file
++ pkg test
+  + Verify the tests ran OK
++ pkg package
++ pkg release
++ pkg dist-clean
 
-+ epm
+** Dependencies
++ autoconf
+  + Provides: autoreconf
++ automake
+  + Provides: aclocal
++ epm - Pick the lastest install package for your distribution.
   + Release: https://moria.whyayh.com/rel/released/software/ThirdParty/epm/
   + Forked Source: https://github.com/TurtleEngr/epm-deb-pkg
   + Source: https://github.com/jimjag/epm
   + Provides: epm, epminstall, mkepmlist
-
 + epm-helper
   + Release: https://moria.whyayh.com/rel/released/software/ThirdParty/epm/
   + Source: https://github.com/TurtleEngr/epm-helper
   + Provides: mkver.pl, patch-epm-list
+
+** Files in contrib/epm-pkg/
++ README-pkg.org - this file
++ Makefile.pkg
++ epm.patch* - remove dirs that do not belong to the package
++ mx.require - list required packages for the mx distribution
++ ver.sh* - define the package's meta-data.
++ postinstall.sh - ?
+
+*** Generated files
++ dist/ - created by 'pkg build' and 'make build install' targets
++ pkg/ - created by 'pkg package' target
++ configure - created by 'pkg config' target
+
+*** Generated files in contrib/epm-pkg/
++ ver.mak - used by Makefile.pkg
++ ver.epm - used by package target
++ ver.env - used by release target
++ epm.list - list of files in dist/ to be packaged
