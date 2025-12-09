@@ -4,7 +4,21 @@
   "portable" packge is also build. See the EPM manual for help with
   building the different OS packages. Between EPM, the Makefile, and
   ver.sh, most any *nix OS distribution package can be built.
-- (Note: flatpak, appimage, and snap are not supported by EPM.)
+** Supported OS packages
++ AIX software packages ("installp")
++ AT&T software packages ("pkgadd"), used by Solaris and others
++ BSD packages ("pkg_create")
++ Compaq Tru64 UNIX ("setld")
++ Debian Package Manager ("dpkg")
++ HP-UX software packages ("swinstall")
++ IRIX software manager ("inst", "swmgr", or "tardist")
++ macOS software packages ("name.pkg")
++ Red Hat Package Manager ("rpm")
++ Slackware software packages ("name.tgz")
++ Portable (installation and removal scripts with tar files)
+
+- flatpak, appimage, and snap are not supported by EPM.
+
 ** Setup
 + Install the dependencies.
 + Modify ver.sh as needed. Directions are in the comments.
@@ -38,7 +52,12 @@
   + Manually check epm.list file
 + make test - run the rsnapshot tests
   + Verify the tests ran OK
++ edit 
+  + increment the ProdBuild var in ver.sh
+  + create the $ProdOSDist.require file for your OS (see ver.env)
 + make package - build the native and portable packages
+  + to build "native" packages, you need to be in the OS you are
+    making the package for.
 + make release - copy package files to a "release" server
 + make dist-clean - remove all generated files
 
