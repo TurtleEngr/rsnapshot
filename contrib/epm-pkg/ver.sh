@@ -31,7 +31,7 @@ export ProdRC=""
 # If set and RELEASE=1
   # %release rc.ProdRC
 
-export ProdBuild="1"
+export ProdBuild="2"
 # [0-9.]*
 # Required
 # If RELEASE=1, and ProdRC=""

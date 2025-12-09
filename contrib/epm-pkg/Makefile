@@ -1,11 +1,7 @@
 # -*- mode: makefile; -*-
-# contrib/epm-pkg/Makefile.pkg
+# contrib/epm-pkg/Makefile
 # Build packages with epm program.
 # All the config files are in: contrib/epm-pkg/
-
-# To use always reference the contrib/epm-pkg/Makefile.pkg. See alias.
-# make -f contrib/epm-pkg/Makefile.pkg TARGET
-
 
 # --------------------
 # Macros
@@ -22,16 +18,16 @@ include ver.mak
 # 1
 help :
 	@echo -e "\nInitialize"
-	@echo -e '\tpkg config\n'
+	@echo -e '\tmake config\n'
 	@echo -e "Build the pseudo root dist/"
-	@echo -e "\tpkg build\n"
+	@echo -e "\tmake build\n"
 	@echo -e "Create the package. Put it in pkg/"
-	@echo -e "\tpkg package"
+	@echo -e "\tmake package"
 
 # 2
 config : check-deps ../../configure ver.mak
 	if [ "$$(whoami)" = 'root' ]; then exit 1; fi
-	@echo -e '\nNow type "make build"'
+	@echo -e '\nNow run "make build"'
 
 # 3
 build ../../dist/usr/local/bin/rsnapshot : ../../configure ../../dist ver.env
@@ -50,12 +46,12 @@ build ../../dist/usr/local/bin/rsnapshot : ../../configure ../../dist ver.env
 	find ../../dist -type d -exec chmod a+rx {} \;
 	find ../../dist -type f -exec chmod a+r {} \;
 	cd ../..; mkepmlist -u root -g root --prefix / dist | patch-epm-list -f ./contrib/epm-pkg/epm.patch >contrib/epm-pkg/epm.list
-	@echo -e '\nNow type "make test"'
+	@echo -e '\nNow run "make test"'
 
 # 4
 test :
 	cd ../..; make test
-	@echo -e '\nIf OK type "sudo make package"'
+	@echo -e '\nIf OK run "sudo make package"'
 
 # 5
 package : ../../dist/usr/local/bin/rsnapshot ../../pkg ver.epm
@@ -64,7 +60,7 @@ package : ../../dist/usr/local/bin/rsnapshot ../../pkg ver.epm
 	cd ../..; epm -v -f native --output-dir pkg $(ProdName) contrib/epm-pkg/ver.epm
 	cd ../..; epm -v -f portable --output-dir pkg -m $(ProdOSDist)-$(ProdArch) $(ProdName) contrib/epm-pkg/ver.epm
 	chown -R $$SUDO_USER:$$SUDO_USER ../../*
-	@echo -e '\nIf OK type "make release"'
+	@echo -e '\nIf OK run "make release"'
 
 # 6
 release : save ver.env
